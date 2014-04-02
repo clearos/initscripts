@@ -1,6 +1,6 @@
 Summary: The inittab file and the /etc/init.d scripts
 Name: initscripts
-Version: 9.49.7
+Version: 9.49.17
 # ppp-watch is GPLv2+, everything else is GPLv2
 License: GPLv2 and GPLv2+
 Group: System Environment/Base
@@ -28,7 +28,7 @@ Requires: udev >= 125-1
 Requires: cpio
 Requires: hostname
 Conflicts: ipsec-tools < 0.8.0-2
-Conflicts: NetworkManager < 0.9.9.0-9.git20130807
+Conflicts: NetworkManager < 0.9.9.0-37.git20140131.el7
 Requires(pre): /usr/sbin/groupadd
 Requires(post): /sbin/chkconfig, coreutils
 Requires(preun): /sbin/chkconfig
@@ -36,10 +36,9 @@ BuildRequires: glib2-devel popt-devel gettext pkgconfig
 Provides: /sbin/service
 
 %description
-The initscripts package contains the basic system scripts used to boot
-your Red Hat or Fedora system, change runlevels, and shut the system down
-cleanly.  Initscripts also contains the scripts that activate and
-deactivate most network interfaces.
+The initscripts package contains basic system scripts used
+during a boot of the system. It also contains scripts which
+activate and deactivate most network interfaces.
 
 %package -n debugmode
 Summary: Scripts for running in debugging mode
@@ -74,10 +73,6 @@ rm -f \
 
 touch $RPM_BUILD_ROOT/etc/crypttab
 chmod 600 $RPM_BUILD_ROOT/etc/crypttab
-
-rm -f $RPM_BUILD_ROOT/etc/rc.d/rc.local $RPM_BUILD_ROOT/etc/rc.local
-touch $RPM_BUILD_ROOT/etc/rc.d/rc.local
-chmod 755 $RPM_BUILD_ROOT/etc/rc.d/rc.local
 
 %pre
 /usr/sbin/groupadd -g 22 -r -f utmp
@@ -132,7 +127,6 @@ rm -rf $RPM_BUILD_ROOT
 /etc/sysconfig/network-scripts/network-functions-ipv6
 /etc/sysconfig/network-scripts/init.ipv6-global
 %config(noreplace) /etc/sysconfig/network-scripts/ifcfg-lo
-/etc/sysconfig/network-scripts/ifup-ipx
 /etc/sysconfig/network-scripts/ifup-post
 /etc/sysconfig/network-scripts/ifdown-ppp
 /etc/sysconfig/network-scripts/ifup-ppp
@@ -172,7 +166,6 @@ rm -rf $RPM_BUILD_ROOT
 /etc/rc[0-9].d
 %dir /etc/rc.d/init.d
 /etc/rc.d/init.d/*
-%ghost %verify(not md5 size mtime) %config(noreplace,missingok) /etc/rc.d/rc.local
 %config(noreplace) /etc/sysctl.conf
 /usr/lib/sysctl.d/00-system.conf
 /etc/sysctl.d/99-sysctl.conf
@@ -188,6 +181,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(2755,root,root) /usr/sbin/netreport
 /usr/lib/udev/rules.d/*
 /usr/lib/udev/rename_device
+/usr/lib/udev/udev-kvm-check
 /usr/sbin/service
 /usr/sbin/ppp-watch
 %{_mandir}/man*/*
@@ -208,6 +202,7 @@ rm -rf $RPM_BUILD_ROOT
 %ghost %attr(0600,root,utmp) /var/log/btmp
 %ghost %attr(0664,root,utmp) /var/log/wtmp
 %ghost %attr(0664,root,utmp) /var/run/utmp
+%ghost %attr(0644,root,root) /etc/sysconfig/kvm
 %ghost %verify(not md5 size mtime) %config(noreplace,missingok) /etc/crypttab
 %dir /usr/lib/tmpfiles.d
 /usr/lib/tmpfiles.d/initscripts.conf
@@ -220,6 +215,47 @@ rm -rf $RPM_BUILD_ROOT
 /etc/profile.d/debug*
 
 %changelog
+* Wed Apr 02 2014 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.17-1
+- add configurable DEVTIMEOUT
+
+* Tue Apr 01 2014 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.16-1
+- network: detect if / is on netfs (#1029677)
+- is_nm_handling: fix RE (#1083040)
+
+* Tue Mar 11 2014 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.15-1
+- network: try to not compete with NM during boot (#1068621)
+
+* Thu Feb 27 2014 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.14-1
+- update ifup/ifdown NetworkManager interaction (#1036701, #1061810)
+- service: fix action matching
+- service: add condrestart to allowed commands (#1069222)
+
+* Wed Feb 12 2014 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.13-1
+- delete IPX support
+- update ifup/ifdown NetworkManager interaction (#1036701, #1061810)
+- set shmmax and shmall defaults to match rhel6 values (#1056547)
+
+* Wed Dec 04 2013 Lukas Nykryn <lnykryn@redhat.com> - 9.49.12-1
+- use iw instead of iwconfig and friends (#915343)
+- don't care about rc.local anymore (#1034156)
+- udev-kvm-check: simplify reading of threshold (#1031568)
+- brandbot: read only first line (#1031490)
+
+* Thu Nov 14 2013 Václav Pavlín <vpavlin@redhat.com> - 9.49.11-1
+- Revert: provide KVM guest count and limit info message (#1014731)
+- add C implementation of reverted patch
+
+* Wed Nov 13 2013 Václav Pavlín <vpavlin@redhat.com> - 9.49.10-1
+- provide KVM guest count and limit info message (#1014731)
+
+* Tue Nov 12 2013 Václav Pavlín <vpavlin@redhat.com> - 9.49.9-1
+- spec: update description of the initscript package
+
+* Tue Nov 12 2013 Václav Pavlín <vpavlin@redhat.com> - 9.49.8-1
+- service: suggest using systemctl if unknown action is used (#1029350)
+- rename_device: remove comments and trailing whitespaces (#1027945)
+- readonly-root: restore selinux context after bind mount (#1029342)
+
 * Tue Nov 05 2013 Lukas Nykryn <lnykryn@redhat.com> - 9.49.7-1
 - readonly-root: Add /var/log/audit/audit.log to rwtab (#1026815)
 - brandot: fix posssible segfault (#1024922)
