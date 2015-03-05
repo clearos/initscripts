@@ -1,10 +1,10 @@
 Summary: The inittab file and the /etc/init.d scripts
 Name: initscripts
-Version: 9.49.17
+Version: 9.49.24
 # ppp-watch is GPLv2+, everything else is GPLv2
 License: GPLv2 and GPLv2+
 Group: System Environment/Base
-Release: 1%{?dist}.1
+Release: 1%{?dist}
 URL: http://fedorahosted.org/releases/i/n/initscripts/
 Source: http://fedorahosted.org/releases/i/n/initscripts/initscripts-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
@@ -35,8 +35,6 @@ Requires(preun): /sbin/chkconfig
 BuildRequires: glib2-devel popt-devel gettext pkgconfig
 Provides: /sbin/service
 
-Patch0: 0001-fedora-readonly-fix-prefix-detection-1059749.patch
-
 %description
 The initscripts package contains basic system scripts used
 during a boot of the system. It also contains scripts which
@@ -55,7 +53,6 @@ Currently, this consists of various memory checking code.
 
 %prep
 %setup -q
-%patch0 -p1
 
 %build
 make
@@ -201,6 +198,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir /etc/NetworkManager/dispatcher.d
 /etc/NetworkManager/dispatcher.d/00-netreport
 %doc sysconfig.txt sysvinitfiles static-routes-ipv6 ipv6-tunnel.howto ipv6-6to4.howto changes.ipv6 COPYING
+%doc examples
 /var/lib/stateless
 %ghost %attr(0600,root,utmp) /var/log/btmp
 %ghost %attr(0664,root,utmp) /var/log/wtmp
@@ -218,8 +216,51 @@ rm -rf $RPM_BUILD_ROOT
 /etc/profile.d/debug*
 
 %changelog
-* Thu Aug 14 2014 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.17-1.1
-- fedora-readonly: fix prefix detection
+* Thu Jan 15 2015 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.24-1
+- rhel-import-state.service: run a little bit later
+
+* Tue Dec 16 2014 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.23-1
+- ifdown-ipv6: reset addrgenmode to eui64 for device
+- ifup: fix typo
+
+* Wed Nov 12 2014 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.22-1
+- adjust LINKDELAY when STP is on
+
+* Fri Oct 24 2014 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.21-1
+- ifup,vlan: fix typo
+
+* Thu Oct 09 2014 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.20-1
+- rhel-import-state: do not clobber /
+
+* Tue Sep 23 2014 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.19-1
+- minor fixes
+
+* Wed Sep 17 2014 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.18-1
+- is_available_wait: properly propage return value from is_available
+- man: update sys-unconfig.8
+- rename_devices: comments need to have a blank before them
+- add example ifcfg files
+- network-functions: improve bonding_masters grep
+- ifup: if we were unable to determine DEVICE always call nmcli up
+- ifup-tunnel: call ifup-ipv6 in the end
+- ifup: also set multicast_snooping after the bridge is up
+- ifup-eth: some options for bridge can be applied after the bridge is up
+- custom naming for VLAN devices
+- ifup-wireless: add support for wowlan
+- vi.po: fix parentheses
+- network-functions: ETHTOOL_DELAY introduction patch
+- ipcalc: -c allow netmask
+- ipcalc: parse prefix more safely
+- use pie and relro by default
+- sys-unconfig: use poweroff instead of halt
+- ifup-aliases: improve duplicate address detection
+- network-functions: handle BONDING_OPTS better
+- fedora-readonly: fix prefix detection (#1059749)
+- network: tell nm to wake the slaves
+- bridging: add possibility to set prio and ageing
+- network: add support for team devices
+- inittab: fix path and mention set-default
+- fedora-domainname: DefaultDependencies=no
 
 * Wed Apr 02 2014 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.17-1
 - add configurable DEVTIMEOUT
