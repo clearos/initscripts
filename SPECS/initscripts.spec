@@ -7,6 +7,8 @@ Group: System Environment/Base
 Release: 1%{?dist}
 URL: http://fedorahosted.org/releases/i/n/initscripts/
 Source: http://fedorahosted.org/releases/i/n/initscripts/initscripts-%{version}.tar.bz2
+Patch100: initscripts-9.49.24-multiwan.patch
+Patch101: initscripts-9.49.24-peerdns.patch 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Obsoletes: initscripts-legacy <= 9.39
 Requires: /bin/awk, sed, coreutils
@@ -53,6 +55,8 @@ Currently, this consists of various memory checking code.
 
 %prep
 %setup -q
+%patch100 -p1
+%patch101 -p1
 
 %build
 make
@@ -82,6 +86,8 @@ touch /var/log/wtmp /var/run/utmp /var/log/btmp
 chown root:utmp /var/log/wtmp /var/run/utmp /var/log/btmp
 chmod 664 /var/log/wtmp /var/run/utmp
 chmod 600 /var/log/btmp
+
+[ ! -e /etc/resolv.conf ] && ln -s /etc/resolv-peerdns.conf /etc/resolv.conf
 
 /usr/sbin/chkconfig --add network
 /usr/sbin/chkconfig --add netconsole
@@ -216,6 +222,10 @@ rm -rf $RPM_BUILD_ROOT
 /etc/profile.d/debug*
 
 %changelog
+* Fri Apr 03 2015 ClearFoundation <developer@clearfoundation.com> - 9.49.24-1.v7
+- add multiwan patch
+- add resolver patch
+
 * Thu Jan 15 2015 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.24-1
 - rhel-import-state.service: run a little bit later
 
