@@ -6,7 +6,7 @@ Forked version of initscripts with ClearOS changes applied
   Add __#kojibuild__ to commit message to automatically build
 
 * git clone git://github.com/clearos/initscripts.git
-* cd gconsole
+* cd initscripts
 * git checkout c7
 * git remote add upstream git://git.centos.org/rpms/initscripts.git
 * git pull upstream c7
