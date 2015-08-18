@@ -2,9 +2,6 @@
 
 Forked version of initscripts with ClearOS changes applied
 
-## Update usage
-  Add __#kojibuild__ to commit message to automatically build
-
 * git clone git+ssh://git@github.com/clearos/initscripts.git
 * cd initscripts
 * git checkout c7
