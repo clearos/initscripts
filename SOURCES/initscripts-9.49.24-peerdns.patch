@@ -1,6 +1,6 @@
-diff -up initscripts-9.49.24/rwtab.peerdns initscripts-9.49.24/rwtab
---- initscripts-9.49.24/rwtab.peerdns	2015-01-15 01:57:03.000000000 -0700
-+++ initscripts-9.49.24/rwtab	2015-04-03 09:55:58.310658951 -0600
+diff -rup initscripts-9.49.30/rwtab initscripts-9.49.30-peerdns/rwtab
+--- initscripts-9.49.30/rwtab	2015-09-16 07:51:07.000000000 -0400
++++ initscripts-9.49.30-peerdns/rwtab	2015-12-03 19:46:18.991453127 -0500
 @@ -25,6 +25,7 @@ empty	/var/tmp
  files	/etc/adjtime
  files	/etc/ntp.conf
@@ -9,9 +9,9 @@ diff -up initscripts-9.49.24/rwtab.peerdns initscripts-9.49.24/rwtab
  files	/etc/lvm/cache
  files	/etc/lvm/archive
  files	/etc/lvm/backup
-diff -up initscripts-9.49.24/sysconfig/network-scripts/ifup-post.peerdns initscripts-9.49.24/sysconfig/network-scripts/ifup-post
---- initscripts-9.49.24/sysconfig/network-scripts/ifup-post.peerdns	2015-01-15 01:57:03.000000000 -0700
-+++ initscripts-9.49.24/sysconfig/network-scripts/ifup-post	2015-04-03 09:55:58.313658959 -0600
+diff -rup initscripts-9.49.30/sysconfig/network-scripts/ifup-post initscripts-9.49.30-peerdns/sysconfig/network-scripts/ifup-post
+--- initscripts-9.49.30/sysconfig/network-scripts/ifup-post	2015-09-16 07:51:07.000000000 -0400
++++ initscripts-9.49.30-peerdns/sysconfig/network-scripts/ifup-post	2015-12-03 19:47:00.959687484 -0500
 @@ -26,12 +26,12 @@ fi
  if [ "$PEERDNS" != "no" ] ||[ -n "$RESOLV_MODS" -a "$RESOLV_MODS" != "no" ]; then
    [ -n "$MS_DNS1" ] && DNS1=$MS_DNS1
@@ -27,9 +27,9 @@ diff -up initscripts-9.49.24/sysconfig/network-scripts/ifup-post.peerdns initscr
  	case $answer in
  	    nameserver*|EOF)
  		if [ -n "$current_replacement" ] ; then
-diff -up initscripts-9.49.24/sysconfig/network-scripts/network-functions.peerdns initscripts-9.49.24/sysconfig/network-scripts/network-functions
---- initscripts-9.49.24/sysconfig/network-scripts/network-functions.peerdns	2015-01-15 01:57:03.000000000 -0700
-+++ initscripts-9.49.24/sysconfig/network-scripts/network-functions	2015-04-03 09:55:58.317658970 -0600
+diff -rup initscripts-9.49.30/sysconfig/network-scripts/network-functions initscripts-9.49.30-peerdns/sysconfig/network-scripts/network-functions
+--- initscripts-9.49.30/sysconfig/network-scripts/network-functions	2015-09-16 07:51:07.000000000 -0400
++++ initscripts-9.49.30-peerdns/sysconfig/network-scripts/network-functions	2015-12-03 19:47:53.288212337 -0500
 @@ -364,11 +364,11 @@ need_hostname ()
  set_hostname ()
  {
@@ -44,19 +44,15 @@ diff -up initscripts-9.49.24/sysconfig/network-scripts/network-functions.peerdns
  		echo "search $domain" >> $rsctmp
  		change_resolv_conf $rsctmp
  		/bin/rm -f $rsctmp
-@@ -528,10 +528,10 @@ is_bonding_device ()
-    [ -f "/sys/class/net/$1/bonding/slaves" ]
- }
- 
--# Invoke this when /etc/resolv.conf has changed:
-+# Invoke this when /etc/resolv-peerdns.conf has changed:
+@@ -531,7 +531,7 @@ is_bonding_device ()
+ # Invoke this when /etc/resolv.conf has changed:
  change_resolv_conf ()
  {
 -    s=$(/bin/grep '^[\ \	]*option' /etc/resolv.conf 2>/dev/null);
 +    s=$(/bin/grep '^[\ \	]*option' /etc/resolv-peerdns.conf 2>/dev/null);
-     if [ "x$s" != "x" ]; then
-        s="$s"$'\n';
-     fi;
+     if [ $# -gt 1 ]; then
+        if [ "x$s" != "x" ]; then
+           s="$s"$'\n';
 @@ -558,11 +558,11 @@ change_resolv_conf ()
  	  s=$(cat $1);
         fi;
@@ -72,9 +68,9 @@ diff -up initscripts-9.49.24/sysconfig/network-scripts/network-functions.peerdns
  	[ -e /var/run/nscd/socket ] && /usr/sbin/nscd -i hosts; # invalidate cache
      fi;
      return $r;
-diff -up initscripts-9.49.24/sysconfig.txt.peerdns initscripts-9.49.24/sysconfig.txt
---- initscripts-9.49.24/sysconfig.txt.peerdns	2015-01-15 01:57:03.000000000 -0700
-+++ initscripts-9.49.24/sysconfig.txt	2015-04-03 09:55:58.322658983 -0600
+diff -rup initscripts-9.49.30/sysconfig.txt initscripts-9.49.30-peerdns/sysconfig.txt
+--- initscripts-9.49.30/sysconfig.txt	2015-09-16 07:51:07.000000000 -0400
++++ initscripts-9.49.30-peerdns/sysconfig.txt	2015-12-03 19:48:19.881527564 -0500
 @@ -517,10 +517,10 @@ Files in /etc/sysconfig/network-scripts/
      WINDOW=
        Default window for routes from this device

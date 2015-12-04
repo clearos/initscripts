@@ -1,6 +1,6 @@
 Summary: The inittab file and the /etc/init.d scripts
 Name: initscripts
-Version: 9.49.24
+Version: 9.49.30
 # ppp-watch is GPLv2+, everything else is GPLv2
 License: GPLv2 and GPLv2+
 Group: System Environment/Base
@@ -126,7 +126,7 @@ rm -rf $RPM_BUILD_ROOT
 /etc/sysconfig/network-scripts/ifdown-post
 /etc/sysconfig/network-scripts/ifup
 /usr/sbin/ifup
-/usr/sbin/brandbot
+/usr/libexec/initscripts/brandbot
 %dir /etc/sysconfig/console
 %dir /etc/sysconfig/modules
 /etc/sysconfig/network-scripts/network-functions
@@ -222,9 +222,39 @@ rm -rf $RPM_BUILD_ROOT
 /etc/profile.d/debug*
 
 %changelog
-* Fri Apr 03 2015 ClearFoundation <developer@clearfoundation.com> - 9.49.24-1.v7
+* Thu Dec 03 2015 ClearFoundation <developer@clearfoundation.com> - 9.49.30-1.v7
 - add multiwan patch
 - add resolver patch
+
+* Wed Sep 16 2015 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.30-1
+- ifup-eth: some bridge options are applied later
+
+* Tue Sep 15 2015 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.29-1
+- service: improve status and stop function for daemon with intscripts
+
+* Mon Aug 31 2015 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.28-1
+- init.d/functions: reload systemd if it can't see an initscript
+
+* Fri Aug 07 2015 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.27-1
+- network-functions: fix wireless detection
+
+* Wed Jul 01 2015 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.26-1
+- import-state: don't run restorecon when it does not exist
+- network-functions: reeplace iwconfig with iw
+- fedora-readonly: use --make-slave with --bind mounts
+
+* Wed Jun 17 2015 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.25-1
+- network: tell NM to reload its configuration during start
+- bonding: warn if the ifup for slave device failed
+- brandbot: move to /usr/libexec/initscripts
+- sysctl.conf: drop SHMALL and SHMMAX, they have sane default values in kernel
+- rename_device: allow non-channel nics for s390x machines
+- network-functions: fix check in install_bonding_driver
+- ifup-aliases: don't return with error when arping fails
+- network-functions: fix change_resolv_conf after grep update
+- clarify daemon() usage message
+- ifup: don't call NM for loopback
+- ifup: add missing quotes
 
 * Thu Jan 15 2015 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.24-1
 - rhel-import-state.service: run a little bit later
