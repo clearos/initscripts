@@ -4,11 +4,9 @@ Version: 9.49.30
 # ppp-watch is GPLv2+, everything else is GPLv2
 License: GPLv2 and GPLv2+
 Group: System Environment/Base
-Release: 1%{?dist}.1
+Release: 1%{?dist}.2
 URL: http://fedorahosted.org/releases/i/n/initscripts/
 Source: http://fedorahosted.org/releases/i/n/initscripts/initscripts-%{version}.tar.bz2
-Patch100: initscripts-9.49.24-multiwan.patch
-Patch101: initscripts-9.49.24-peerdns.patch 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Obsoletes: initscripts-legacy <= 9.39
 Requires: /bin/awk, sed, coreutils
@@ -37,6 +35,11 @@ Requires(preun): /sbin/chkconfig
 BuildRequires: glib2-devel popt-devel gettext pkgconfig
 Provides: /sbin/service
 
+Patch1: 0001-autorelabel-call-dracut-initramfs-restore-before-for.patch
+Patch2: 0001-autorelabel-turn-quota-off-before-relabeling.patch
+Patch100: initscripts-9.49.24-multiwan.patch
+Patch101: initscripts-9.49.24-peerdns.patch 
+
 %description
 The initscripts package contains basic system scripts used
 during a boot of the system. It also contains scripts which
@@ -55,6 +58,8 @@ Currently, this consists of various memory checking code.
 
 %prep
 %setup -q
+%patch1 -p1
+%patch2 -p1
 %patch100 -p1
 %patch101 -p1
 
@@ -225,9 +230,15 @@ rm -rf $RPM_BUILD_ROOT
 /etc/profile.d/debug*
 
 %changelog
-* Thu Dec 03 2015 ClearFoundation <developer@clearfoundation.com> - 9.49.30-1.v7
+* Tue May 10 2016 ClearFoundation <developer@clearfoundation.com> - 9.49.30-1.v7.2
 - add multiwan patch
 - add resolver patch
+
+* Tue Mar 15 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.30-2.1
+- autorelabel: turn quota off before relabeling
+
+* Tue Feb 02 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.30-1.1
+- autorelabel: call dracut-initramfs-restore before forced reboot
 
 * Wed Sep 16 2015 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.30-1
 - ifup-eth: some bridge options are applied later
