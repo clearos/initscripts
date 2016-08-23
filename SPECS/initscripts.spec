@@ -4,7 +4,7 @@ Version: 9.49.30
 # ppp-watch is GPLv2+, everything else is GPLv2
 License: GPLv2 and GPLv2+
 Group: System Environment/Base
-Release: 1%{?dist}.2
+Release: 1%{?dist}.3
 URL: http://fedorahosted.org/releases/i/n/initscripts/
 Source: http://fedorahosted.org/releases/i/n/initscripts/initscripts-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
@@ -37,6 +37,7 @@ Provides: /sbin/service
 
 Patch1: 0001-autorelabel-call-dracut-initramfs-restore-before-for.patch
 Patch2: 0001-autorelabel-turn-quota-off-before-relabeling.patch
+Patch3: 0001-source_config-tell-NetworkManger-to-load-ifcfg-file-.patch
 Patch100: initscripts-9.49.24-multiwan.patch
 Patch101: initscripts-9.49.24-peerdns.patch 
 
@@ -60,6 +61,7 @@ Currently, this consists of various memory checking code.
 %setup -q
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 %patch100 -p1
 %patch101 -p1
 
@@ -230,11 +232,14 @@ rm -rf $RPM_BUILD_ROOT
 /etc/profile.d/debug*
 
 %changelog
-* Tue May 10 2016 ClearFoundation <developer@clearfoundation.com> - 9.49.30-1.v7.2
+* Tue Aug 23 2016 ClearFoundation <developer@clearfoundation.com> - 9.49.30-1.v7.3
 - add multiwan patch
 - add resolver patch
 
-* Tue Mar 15 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.30-2.1
+* Thu Jun 16 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.30-1.3
+- source_config: tell NetworkManger to load ifcfg file even for NM_CONTROLLED=no
+
+* Tue Mar 15 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.30-1.2
 - autorelabel: turn quota off before relabeling
 
 * Tue Feb 02 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.30-1.1
