@@ -39,7 +39,7 @@ Patch1: 0001-autorelabel-call-dracut-initramfs-restore-before-for.patch
 Patch2: 0001-autorelabel-turn-quota-off-before-relabeling.patch
 Patch3: 0001-source_config-tell-NetworkManger-to-load-ifcfg-file-.patch
 Patch100: initscripts-9.49.24-multiwan.patch
-Patch101: initscripts-9.49.24-peerdns.patch 
+Patch101: initscripts-9.49.24-peerdns.patch
 
 %description
 The initscripts package contains basic system scripts used
