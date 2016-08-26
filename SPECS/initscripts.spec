@@ -87,6 +87,7 @@ chmod 600 $RPM_BUILD_ROOT/etc/crypttab
 
 # Cleanup?
 rm -f $RPM_BUILD_ROOT/etc/sysconfig/network-scripts/ifup-eth.orig
+rm -f $RPM_BUILD_ROOT/etc/sysconfig/network-scripts/network-functions.orig
 
 %pre
 /usr/sbin/groupadd -g 22 -r -f utmp
