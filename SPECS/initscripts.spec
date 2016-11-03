@@ -1,10 +1,10 @@
 Summary: The inittab file and the /etc/init.d scripts
 Name: initscripts
-Version: 9.49.30
+Version: 9.49.37
 # ppp-watch is GPLv2+, everything else is GPLv2
 License: GPLv2 and GPLv2+
 Group: System Environment/Base
-Release: 1%{?dist}.3
+Release: 1%{?dist}
 URL: http://fedorahosted.org/releases/i/n/initscripts/
 Source: http://fedorahosted.org/releases/i/n/initscripts/initscripts-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
@@ -35,10 +35,6 @@ Requires(preun): /sbin/chkconfig
 BuildRequires: glib2-devel popt-devel gettext pkgconfig
 Provides: /sbin/service
 
-Patch1: 0001-autorelabel-call-dracut-initramfs-restore-before-for.patch
-Patch2: 0001-autorelabel-turn-quota-off-before-relabeling.patch
-Patch3: 0001-source_config-tell-NetworkManger-to-load-ifcfg-file-.patch
-
 %description
 The initscripts package contains basic system scripts used
 during a boot of the system. It also contains scripts which
@@ -57,9 +53,6 @@ Currently, this consists of various memory checking code.
 
 %prep
 %setup -q
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
 
 %build
 make
@@ -216,6 +209,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/lib/tmpfiles.d/initscripts.conf
 %dir /usr/libexec/initscripts
 %dir /usr/libexec/initscripts/legacy-actions
+%ghost %{_localstatedir}/log/dmesg
+%ghost %{_localstatedir}/log/dmesg.old
 
 %files -n debugmode
 %defattr(-,root,root)
@@ -223,13 +218,41 @@ rm -rf $RPM_BUILD_ROOT
 /etc/profile.d/debug*
 
 %changelog
-* Thu Jun 16 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.30-1.3
+* Mon Sep 12 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.37-1
+- rhel-import-state: fix broken order of parameters
+
+* Fri Sep 09 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.36-1
+- import-state: copy just some attributes
+
+* Tue Aug 02 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.35-1
+- functions: systemctl show now returns an error when unit does not exist
+
+* Fri Jul 15 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.34-1
+- import-state: restore also sensitivity part of SELinux context
+
+* Thu Jul 14 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.33-1
+- network: run after network-pre.target
+
+* Thu Jun 23 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.32-1
+- ifup-eth: fix setting preferred_lft and valid_lft
+
+* Mon Jun 13 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.31-1
+- ipv6: wait for all global IPv6 addresses to leave the "tentative" state
 - source_config: tell NetworkManger to load ifcfg file even for NM_CONTROLLED=no
-
-* Tue Mar 15 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.30-1.2
+- ifup-aliases: inherit ARPCHECK from parent device
+- rhel-dmesg: don't start in containers
+- ifup-eth: fix typo in error message (#1038776)
+- sysctl.conf: steal comments about /usr,/etc,... from fedora's sysctl.conf
+- rwtab: /var/lib/nfs needs to copy the files
+- functions: improve killing loops
+- ipcalc: detect invalid mask
+- ifup: set valid_lft and preferred_lft to forever for static ip
+- service: use systemd mangle for given service
+- ifup-post: check resolve.conf also with DNS2
+- ifdown-post: remove resolv.conf only in specific cases
+- spec: ghost /var/log/dmesg
+- network-functions: is_available_wait should wait even in the case that is_available returns 2
 - autorelabel: turn quota off before relabeling
-
-* Tue Feb 02 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.30-1.1
 - autorelabel: call dracut-initramfs-restore before forced reboot
 
 * Wed Sep 16 2015 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.30-1
