@@ -228,7 +228,7 @@ rm -rf $RPM_BUILD_ROOT
 /etc/profile.d/debug*
 
 %changelog
-* Mon Nov 28 2016 ClearFoundation <developer@clearfoundation.com> - 9.49.37-1.v7
+* Tue Nov 29 2016 ClearFoundation <developer@clearfoundation.com> - 9.49.37-1.v7
 - add multiwan patch
 - add resolver patch
 
