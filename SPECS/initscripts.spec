@@ -34,8 +34,8 @@ Requires(post): /sbin/chkconfig, coreutils
 Requires(preun): /sbin/chkconfig
 BuildRequires: glib2-devel popt-devel gettext pkgconfig
 Provides: /sbin/service
-Patch100: initscripts-9.49.24-multiwan.patch
-Patch101: initscripts-9.49.24-peerdns.patch
+Patch100: initscripts-9.49.37-multiwan.patch
+Patch101: initscripts-9.49.37-peerdns.patch
 
 %description
 The initscripts package contains basic system scripts used
