@@ -1,0 +1,73 @@
+From 44b84c4b92705917f7c124b714bc93ca42e00ec3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20Hor=C3=A1=C4=8Dek?= <phoracek@redhat.com>
+Date: Mon, 30 Jan 2017 18:47:11 +0100
+Subject: [PATCH 1/2] network: check for running NetworkManager via dbus
+
+Use dbus instead of nmcli to make ifup command faster.
+---
+ sysconfig/network-scripts/network-functions | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/sysconfig/network-scripts/network-functions b/sysconfig/network-scripts/network-functions
+index 9cca982..c1da988 100644
+--- a/sysconfig/network-scripts/network-functions
++++ b/sysconfig/network-scripts/network-functions
+@@ -275,7 +275,11 @@ do_netreport ()
+ 
+ is_nm_running ()
+ {
+-    [ "$(LANG=C nmcli -t --fields running general status 2>/dev/null)" = "running" ]
++    dbus-send --system --print-reply \
++        --dest=org.freedesktop.DBus \
++        /org/freedesktop/DBus \
++        org.freedesktop.DBus.GetNameOwner \
++        string:"org.freedesktop.NetworkManager" >/dev/null 2>&1
+ }
+ 
+ is_nm_active ()
+-- 
+2.9.3
+
+
+From 5329e1457eb6be7121eeee3a4e18bbe82d6ea460 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Petr=20Hor=C3=A1=C4=8Dek?= <phoracek@redhat.com>
+Date: Mon, 30 Jan 2017 18:48:10 +0100
+Subject: [PATCH 2/2] network: load NetworkManager connection via dbus
+
+Use dbus to refresh configuration files for NetworkManager in order
+to make ifup and ifdown faster.
+---
+ sysconfig/network-scripts/network-functions | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/sysconfig/network-scripts/network-functions b/sysconfig/network-scripts/network-functions
+index c1da988..8a79802 100644
+--- a/sysconfig/network-scripts/network-functions
++++ b/sysconfig/network-scripts/network-functions
+@@ -171,7 +171,7 @@ source_config ()
+ 	ISALIAS=no
+     fi
+     if is_nm_running && [ "$REALDEVICE" != "lo" ] ; then
+-        nmcli con load "/etc/sysconfig/network-scripts/$CONFIG"
++        nm_con_load "$CONFIG"
+         if ! is_false $NM_CONTROLLED; then
+             UUID=$(get_uuid_by_config $CONFIG)
+             [ -n "$UUID" ] && _use_nm=true
+@@ -179,6 +179,14 @@ source_config ()
+     fi
+ }
+ 
++nm_con_load () {
++    dbus-send --system --print-reply \
++        --dest=org.freedesktop.NetworkManager \
++        /org/freedesktop/NetworkManager/Settings \
++        org.freedesktop.NetworkManager.Settings.LoadConnections \
++        array:string:"/etc/sysconfig/network-scripts/${1}" >/dev/null 2>&1
++}
++
+ ethtool_set()
+ {
+     oldifs=$IFS;
+-- 
+2.9.3
+

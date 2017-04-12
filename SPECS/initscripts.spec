@@ -4,7 +4,7 @@ Version: 9.49.37
 # ppp-watch is GPLv2+, everything else is GPLv2
 License: GPLv2 and GPLv2+
 Group: System Environment/Base
-Release: 1%{?dist}
+Release: 1%{?dist}.1
 URL: http://fedorahosted.org/releases/i/n/initscripts/
 Source: http://fedorahosted.org/releases/i/n/initscripts/initscripts-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
@@ -35,6 +35,8 @@ Requires(preun): /sbin/chkconfig
 BuildRequires: glib2-devel popt-devel gettext pkgconfig
 Provides: /sbin/service
 
+Patch001: initscripts-9.03.58-use-dbus-instead-of-nmcli.patch
+
 %description
 The initscripts package contains basic system scripts used
 during a boot of the system. It also contains scripts which
@@ -53,6 +55,7 @@ Currently, this consists of various memory checking code.
 
 %prep
 %setup -q
+%patch001 -p1
 
 %build
 make
@@ -218,6 +221,9 @@ rm -rf $RPM_BUILD_ROOT
 /etc/profile.d/debug*
 
 %changelog
+* Thu Feb 16 2017 David Kaspar [Dee'Kej] <dkaspar@redhat.com> - 9.49.37-1.el7_3.1
+- use DBUS calls directly instead of calling nmcli (bug #1422820)
+
 * Mon Sep 12 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.37-1
 - rhel-import-state: fix broken order of parameters
 
