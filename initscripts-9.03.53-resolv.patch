@@ -1,0 +1,122 @@
+diff -rup initscripts-9.03.53/sysconfig/network-scripts/ifdown-post initscripts-9.03.53-resolv/sysconfig/network-scripts/ifdown-post
+--- initscripts-9.03.53/sysconfig/network-scripts/ifdown-post	2016-04-12 03:14:01.000000000 -0600
++++ initscripts-9.03.53-resolv/sysconfig/network-scripts/ifdown-post	2016-05-30 12:00:41.854905469 -0600
+@@ -20,9 +20,9 @@ source_config
+ 
+ if [ "$PEERDNS" != "no" -o -n "$RESOLV_MODS" -a "$RESOLV_MODS" != "no" ] && \
+    [ "${DEVICETYPE}" = "ppp" -o "${DEVICETYPE}" = "ippp" -o -n "${DNS1}" -o "${BOOTPROTO}" = "bootp" -o "${BOOTPROTO}" = "dhcp" ] ; then
+-    if [ -f /etc/resolv.conf.save ]; then
+-	change_resolv_conf /etc/resolv.conf.save
+-	rm -f /etc/resolv.conf.save
++    if [ -f /etc/resolv-peerdns.conf.save ]; then
++	change_resolv_conf /etc/resolv-peerdns.conf.save
++	rm -f /etc/resolv-peerdns.conf.save
+     fi
+     if [ "${DEVICETYPE}" = "ppp" -o "${DEVICETYPE}" = "ippp" ]; then
+         if [ -f /etc/ppp/peers/$DEVICE ] ; then
+diff -rup initscripts-9.03.53/sysconfig/network-scripts/ifup-post initscripts-9.03.53-resolv/sysconfig/network-scripts/ifup-post
+--- initscripts-9.03.53/sysconfig/network-scripts/ifup-post	2016-04-12 03:14:01.000000000 -0600
++++ initscripts-9.03.53-resolv/sysconfig/network-scripts/ifup-post	2016-05-30 12:04:05.160513274 -0600
+@@ -32,13 +32,13 @@ if [ "$PEERDNS" != "no" ] ||[ -n "$RESOL
+           DNS2=
+   fi
+ 
+-  if ( [ -n "$DNS1" ] && ! grep -q "^nameserver $DNS1" /etc/resolv.conf ) ||
+-   ( [ -n "$DNS2" ] && ! grep -q "^nameserver $DNS2" /etc/resolv.conf ) &&
++  if ( [ -n "$DNS1" ] && ! grep -q "^nameserver $DNS1" /etc/resolv-peerdns.conf ) ||
++   ( [ -n "$DNS2" ] && ! grep -q "^nameserver $DNS2" /etc/resolv-peerdns.conf ) &&
+    tr=$(mktemp /tmp/XXXXXX) ; then
+     current_replacement="$DNS1"
+     next_replacement="$DNS2"
+     search=
+-    (cat /etc/resolv.conf ; echo EOF ; echo EOF) | while read answer ; do
++    (cat /etc/resolv-peerdns.conf ; echo EOF ; echo EOF) | while read answer ; do
+ 	case $answer in
+ 	    nameserver*|EOF)
+ 		if [ -n "$current_replacement" ] ; then
+@@ -73,8 +73,8 @@ if [ "$PEERDNS" != "no" ] ||[ -n "$RESOL
+         echo "search $DOMAIN $search" >> $tr
+     fi
+ 
+-    # backup resolv.conf
+-    cp -af /etc/resolv.conf /etc/resolv.conf.save
++    # backup resolv-peerdns.conf
++    cp -af /etc/resolv-peerdns.conf /etc/resolv-peerdns.conf.save
+ 
+     # maintain permissions
+     # but set umask in case it doesn't exist!
+Only in initscripts-9.03.53-resolv/sysconfig/network-scripts: ifup-post.orig
+Only in initscripts-9.03.53-resolv/sysconfig/network-scripts: ifup-post.rej
+diff -rup initscripts-9.03.53/sysconfig/network-scripts/ifup-ppp initscripts-9.03.53-resolv/sysconfig/network-scripts/ifup-ppp
+--- initscripts-9.03.53/sysconfig/network-scripts/ifup-ppp	2016-04-12 03:14:01.000000000 -0600
++++ initscripts-9.03.53-resolv/sysconfig/network-scripts/ifup-ppp	2016-05-30 12:00:41.863905496 -0600
+@@ -110,7 +110,7 @@ if [ "${DEFROUTE}" != no ] ; then
+   opts="$opts defaultroute"
+ fi
+ if [ "${PEERDNS}" != no ] ; then
+-  cp -f /etc/resolv.conf /etc/resolv.conf.save
++  cp -f /etc/resolv-peerdns.conf /etc/resolv-peerdns.conf.save
+   opts="$opts usepeerdns"
+ fi
+ if [ -n "${MRU}" ] ; then
+diff -rup initscripts-9.03.53/sysconfig/network-scripts/network-functions initscripts-9.03.53-resolv/sysconfig/network-scripts/network-functions
+--- initscripts-9.03.53/sysconfig/network-scripts/network-functions	2016-04-12 03:14:01.000000000 -0600
++++ initscripts-9.03.53-resolv/sysconfig/network-scripts/network-functions	2016-05-30 12:00:41.867905507 -0600
+@@ -321,11 +321,11 @@ need_hostname ()
+ set_hostname ()
+ {
+     hostname $1
+-    if ! grep search /etc/resolv.conf >/dev/null 2>&1; then
++    if ! grep search /etc/resolv-peerdns.conf >/dev/null 2>&1; then
+ 	domain=$(echo $1 | sed 's/^[^\.]*\.//')
+ 	if [ -n "$domain" ]; then
+ 		rsctmp=$(mktemp /tmp/XXXXXX);
+-		cat /etc/resolv.conf > $rsctmp
++		cat /etc/resolv-peerdns.conf > $rsctmp
+ 		echo "search $domain" >> $rsctmp
+ 		change_resolv_conf $rsctmp
+ 		/bin/rm -f $rsctmp
+@@ -513,10 +513,10 @@ is_bonding_device ()
+    [ -f "/sys/class/net/$1/bonding/slaves" ]
+ }
+ 
+-# Invoke this when /etc/resolv.conf has changed:
++# Invoke this when /etc/resolv-peerdns.conf has changed:
+ change_resolv_conf ()
+ {
+-    s=$(/bin/grep '^[\ \	]*option' /etc/resolv.conf 2>/dev/null);
++    s=$(/bin/grep '^[\ \	]*option' /etc/resolv-peerdns.conf 2>/dev/null);
+     if [ $# -gt 1 ]; then
+        if [ "x$s" != "x" ]; then
+           s="$s"$'\n';
+@@ -543,11 +543,11 @@ change_resolv_conf ()
+ 	  s=$(cat $1);
+        fi;
+     fi;
+-    (echo "$s" > /etc/resolv.conf;) >/dev/null 2>&1;
++    (echo "$s" > /etc/resolv-peerdns.conf;) >/dev/null 2>&1;
+     r=$?
+     if [ $r -eq 0 ]; then
+ 	[ -x /sbin/restorecon ] && /sbin/restorecon /etc/resolv.conf >/dev/null 2>&1 # reset the correct context
+-	/usr/bin/logger -p local7.notice -t "NET" -i "$0 : updated /etc/resolv.conf";
++	/usr/bin/logger -p local7.notice -t "NET" -i "$0 : updated /etc/resolv-peerdns.conf";
+ 	[ -e /var/lock/subsys/nscd ] && /usr/sbin/nscd -i hosts; # invalidate cache
+     fi;
+     return $r;
+Only in initscripts-9.03.53-resolv/sysconfig/network-scripts: network-functions.orig
+diff -rup initscripts-9.03.53/sysconfig.txt initscripts-9.03.53-resolv/sysconfig.txt
+--- initscripts-9.03.53/sysconfig.txt	2016-04-12 03:14:01.000000000 -0600
++++ initscripts-9.03.53-resolv/sysconfig.txt	2016-05-30 12:00:41.872905522 -0600
+@@ -530,10 +530,10 @@ Files in /etc/sysconfig/network-scripts/
+     WINDOW=
+       Default window for routes from this device
+     PEERDNS=yes|no
+-      modify /etc/resolv.conf if peer uses msdns extension (PPP only) or
++      modify /etc/resolv-peerdns.conf if peer uses msdns extension (PPP only) or
+       DNS{1,2} are set, or if using dhclient. default to "yes".
+     DNS{1,2}=<ip address>
+-      provide DNS addresses that are dropped into the resolv.conf
++      provide DNS addresses that are dropped into the resolv-peerdns.conf
+       file if PEERDNS is not set to "no".
+     SCOPE=
+       Set to "scope SCOPE-ID" to set a non-default scope.  Supported only on

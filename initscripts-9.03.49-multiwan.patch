@@ -1,0 +1,55 @@
+diff -rup initscripts-9.03.49/sysconfig/network-scripts/ifup-eth initscripts-9.03.49-multiwan/sysconfig/network-scripts/ifup-eth
+--- initscripts-9.03.49/sysconfig/network-scripts/ifup-eth	2015-04-09 12:44:27.000000000 -0400
++++ initscripts-9.03.49-multiwan/sysconfig/network-scripts/ifup-eth	2015-08-10 15:58:18.459783151 -0400
+@@ -266,6 +266,19 @@ else 
+         fi
+     done
+ 
++    # ClearFoundation -- improve default route handling in multi-WAN environment
++    if [ -e /etc/clearos/network.conf ]; then
++        . /etc/clearos/network.conf
++    fi
++    MULTIEXT=`echo $EXTIF | awk '{ print $2 }'`
++    if [ -n "$MULTIEXT" ]; then
++        DEFAULTEXISTS=`ip -o route | grep ^default`
++        if [ -n "$DEFAULTEXISTS" ]; then
++            DEFROUTE="no"
++        fi
++    fi
++    # ClearFoundation -- end
++
+     # Set a default route.
+     if [ "${DEFROUTE}" != "no" ] && [ -z "${GATEWAYDEV}" -o "${GATEWAYDEV}" = "${REALDEVICE}" ]; then
+ 	# set up default gateway. replace if one already exists
+Only in initscripts-9.03.49-multiwan/sysconfig/network-scripts: ifup-eth.orig
+diff -rup initscripts-9.03.49/sysconfig/network-scripts/ifup-ppp initscripts-9.03.49-multiwan/sysconfig/network-scripts/ifup-ppp
+--- initscripts-9.03.49/sysconfig/network-scripts/ifup-ppp	2015-04-09 12:44:27.000000000 -0400
++++ initscripts-9.03.49-multiwan/sysconfig/network-scripts/ifup-ppp	2015-08-10 15:58:18.460783151 -0400
+@@ -52,6 +52,8 @@ fi
+ # check that xDSL connection
+ if [ "$TYPE" = "xDSL" ] ; then
+     if [ -x /usr/sbin/adsl-start ] ; then
++        # ClearFoundation - multiple PPPoE interfaces need to behave
++        PPPD_EXTRA="unit $(echo -n "${DEVICE}" | sed -e 's/[[:alpha:]]*//g') $PPPD_EXTRA" \
+         adsl-start /etc/sysconfig/network-scripts/$CONFIG
+         exit $?
+     else
+@@ -99,6 +101,18 @@ fi
+ if [ "${ESCAPECHARS}" != yes ] ; then
+   opts="$opts asyncmap 00000000"
+ fi
++# ClearFoundation -- Multi-WAN friendly default route policy
++if [ -e /etc/clearos/network.conf ]; then
++  . /etc/clearos/network.conf
++fi
++MULTIEXT=`echo $EXTIF | awk '{ print $2 }'`
++if [ -n "${MULTIEXT}" ]; then
++    DEFAULTEXISTS=`ip route list | awk '/^default / { print $3 }'`
++    if [ -n "$DEFAULTEXISTS" ]; then
++        DEFROUTE="no"
++    fi 
++fi
++# ClearFoundation - end
+ if [ "${DEFROUTE}" != no ] ; then
+   # pppd will no longer delete an existing default route
+   # so we have to help it out a little here.

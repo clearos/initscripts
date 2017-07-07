@@ -9,8 +9,8 @@ Group: System Environment/Base
 Release: 1%{?dist}
 URL: http://fedorahosted.org/releases/i/n/initscripts/
 Source: http://fedorahosted.org/releases/i/n/initscripts/initscripts-%{version}.tar.bz2
-Patch1000: centos-initscripts.patch
-
+Patch100: initscripts-9.03.49-multiwan.patch
+Patch101: initscripts-9.03.53-resolv.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Requires: mingetty, /bin/awk, /bin/sed, mktemp
 Requires: /sbin/sysctl
@@ -69,8 +69,8 @@ Currently, this consists of various memory checking code.
 
 %prep
 %setup -q
-
-%patch1000 -p1
+%patch100 -p1
+%patch101 -p1
 
 %build
 make
@@ -78,6 +78,9 @@ make
 %install
 rm -rf $RPM_BUILD_ROOT
 make ROOT=$RPM_BUILD_ROOT SUPERUSER=`id -un` SUPERGROUP=`id -gn` mandir=%{_mandir} install
+
+# ClearFoundation -- there must be a better way
+rm $RPM_BUILD_ROOT/etc/sysconfig/network-scripts/*.orig
 
 %find_lang %{name}
 
@@ -106,6 +109,8 @@ touch /var/log/wtmp /var/run/utmp /var/log/btmp
 chown root:utmp /var/log/wtmp /var/run/utmp /var/log/btmp
 chmod 664 /var/log/wtmp /var/run/utmp
 chmod 600 /var/log/btmp
+
+[ ! -e /etc/resolv.conf ] && ln -s /etc/resolv-peerdns.conf /etc/resolv.conf
 
 /sbin/chkconfig --add netfs
 /sbin/chkconfig --add network
@@ -252,6 +257,10 @@ rm -rf $RPM_BUILD_ROOT
 /etc/profile.d/debug*
 
 %changelog
+* Tue Apr 04 2017 ClearFoundation <developer@clearfoundation.com> - 9.03.58-1.clear
+- add multiwan patch
+- add resolver patch
+
 * Tue Mar 21 2017 Johnny Hughes <johnny@centos.org> - 9.03.58-1
 - Roll in CentOS Branding
 

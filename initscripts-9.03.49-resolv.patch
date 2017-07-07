@@ -1,0 +1,120 @@
+diff -rup initscripts-9.03.49/sysconfig/network-scripts/ifdown-post initscripts-9.03.49-resolv/sysconfig/network-scripts/ifdown-post
+--- initscripts-9.03.49/sysconfig/network-scripts/ifdown-post	2015-04-09 12:44:27.000000000 -0400
++++ initscripts-9.03.49-resolv/sysconfig/network-scripts/ifdown-post	2015-08-10 16:02:41.295782950 -0400
+@@ -20,9 +20,9 @@ source_config
+ 
+ if [ "$PEERDNS" != "no" -o -n "$RESOLV_MODS" -a "$RESOLV_MODS" != "no" ] && \
+    [ "${DEVICETYPE}" = "ppp" -o "${DEVICETYPE}" = "ippp" -o -n "${DNS1}" -o "${BOOTPROTO}" = "bootp" -o "${BOOTPROTO}" = "dhcp" ] ; then
+-    if [ -f /etc/resolv.conf.save ]; then
+-	change_resolv_conf /etc/resolv.conf.save
+-	rm -f /etc/resolv.conf.save
++    if [ -f /etc/resolv-peerdns.conf.save ]; then
++	change_resolv_conf /etc/resolv-peerdns.conf.save
++	rm -f /etc/resolv-peerdns.conf.save
+     fi
+     if [ "${DEVICETYPE}" = "ppp" -o "${DEVICETYPE}" = "ippp" ]; then
+         if [ -f /etc/ppp/peers/$DEVICE ] ; then
+Only in initscripts-9.03.49-resolv/sysconfig/network-scripts: ifdown-post.orig
+diff -rup initscripts-9.03.49/sysconfig/network-scripts/ifup-post initscripts-9.03.49-resolv/sysconfig/network-scripts/ifup-post
+--- initscripts-9.03.49/sysconfig/network-scripts/ifup-post	2015-04-09 12:44:27.000000000 -0400
++++ initscripts-9.03.49-resolv/sysconfig/network-scripts/ifup-post	2015-08-10 16:00:12.909783016 -0400
+@@ -26,12 +26,12 @@ fi
+ if [ "$PEERDNS" != "no" ] ||[ -n "$RESOLV_MODS" -a "$RESOLV_MODS" != "no" ]; then
+   [ -n "$MS_DNS1" ] && DNS1=$MS_DNS1
+   [ -n "$MS_DNS2" ] && DNS2=$MS_DNS2
+-  if [ -n "$DNS1" ] && ! grep -q "^nameserver $DNS1" /etc/resolv.conf &&
++  if [ -n "$DNS1" ] && ! grep -q "^nameserver $DNS1" /etc/resolv-peerdns.conf &&
+    tr=$(mktemp /tmp/XXXXXX) ; then
+     current_replacement="$DNS1"
+     next_replacement="$DNS2"
+     search=
+-    (cat /etc/resolv.conf ; echo EOF ; echo EOF) | while read answer ; do
++    (cat /etc/resolv-peerdns.conf ; echo EOF ; echo EOF) | while read answer ; do
+ 	case $answer in
+ 	    nameserver*|EOF)
+ 		if [ -n "$current_replacement" ] ; then
+@@ -66,8 +66,8 @@ if [ "$PEERDNS" != "no" ] ||[ -n "$RESOL
+         echo "search $DOMAIN $search" >> $tr
+     fi
+ 
+-    # backup resolv.conf
+-    cp -af /etc/resolv.conf /etc/resolv.conf.save
++    # backup resolv-peerdns.conf
++    cp -af /etc/resolv-peerdns.conf /etc/resolv-peerdns.conf.save
+ 
+     # maintain permissions
+     # but set umask in case it doesn't exist!
+diff -rup initscripts-9.03.49/sysconfig/network-scripts/ifup-ppp initscripts-9.03.49-resolv/sysconfig/network-scripts/ifup-ppp
+--- initscripts-9.03.49/sysconfig/network-scripts/ifup-ppp	2015-04-09 12:44:27.000000000 -0400
++++ initscripts-9.03.49-resolv/sysconfig/network-scripts/ifup-ppp	2015-08-10 16:00:12.914783019 -0400
+@@ -110,7 +110,7 @@ if [ "${DEFROUTE}" != no ] ; then
+   opts="$opts defaultroute"
+ fi
+ if [ "${PEERDNS}" != no ] ; then
+-  cp -f /etc/resolv.conf /etc/resolv.conf.save
++  cp -f /etc/resolv-peerdns.conf /etc/resolv-peerdns.conf.save
+   opts="$opts usepeerdns"
+ fi
+ if [ -n "${MRU}" ] ; then
+diff -rup initscripts-9.03.49/sysconfig/network-scripts/network-functions initscripts-9.03.49-resolv/sysconfig/network-scripts/network-functions
+--- initscripts-9.03.49/sysconfig/network-scripts/network-functions	2015-04-09 12:44:27.000000000 -0400
++++ initscripts-9.03.49-resolv/sysconfig/network-scripts/network-functions	2015-08-10 16:05:05.022782764 -0400
+@@ -319,11 +319,11 @@ need_hostname ()
+ set_hostname ()
+ {
+     hostname $1
+-    if ! grep search /etc/resolv.conf >/dev/null 2>&1; then
++    if ! grep search /etc/resolv-peerdns.conf >/dev/null 2>&1; then
+ 	domain=$(echo $1 | sed 's/^[^\.]*\.//')
+ 	if [ -n "$domain" ]; then
+ 		rsctmp=$(mktemp /tmp/XXXXXX);
+-		cat /etc/resolv.conf > $rsctmp
++		cat /etc/resolv-peerdns.conf > $rsctmp
+ 		echo "search $domain" >> $rsctmp
+ 		change_resolv_conf $rsctmp
+ 		/bin/rm -f $rsctmp
+@@ -511,10 +511,10 @@ is_bonding_device ()
+    [ -f "/sys/class/net/$1/bonding/slaves" ]
+ }
+ 
+-# Invoke this when /etc/resolv.conf has changed:
++# Invoke this when /etc/resolv-peerdns.conf has changed:
+ change_resolv_conf ()
+ {
+-    s=$(/bin/grep '^[\ \	]*option' /etc/resolv.conf 2>/dev/null);
++    s=$(/bin/grep '^[\ \	]*option' /etc/resolv-peerdns.conf 2>/dev/null);
+     if [ $# -gt 1 ]; then
+        if [ "x$s" != "x" ]; then
+           s="$s"$'\n';
+@@ -541,11 +541,11 @@ change_resolv_conf ()
+ 	  s=$(cat $1);
+        fi;
+     fi;
+-    (echo "$s" > /etc/resolv.conf;) >/dev/null 2>&1;
++    (echo "$s" > /etc/resolv-peerdns.conf;) >/dev/null 2>&1;
+     r=$?
+     if [ $r -eq 0 ]; then
+ 	[ -x /sbin/restorecon ] && /sbin/restorecon /etc/resolv.conf >/dev/null 2>&1 # reset the correct context
+-	/usr/bin/logger -p local7.notice -t "NET" -i "$0 : updated /etc/resolv.conf";
++	/usr/bin/logger -p local7.notice -t "NET" -i "$0 : updated /etc/resolv-peerdns.conf";
+ 	[ -e /var/lock/subsys/nscd ] && /usr/sbin/nscd -i hosts; # invalidate cache
+     fi;
+     return $r;
+Only in initscripts-9.03.49-resolv/sysconfig/network-scripts: network-functions.orig
+diff -rup initscripts-9.03.49/sysconfig.txt initscripts-9.03.49-resolv/sysconfig.txt
+--- initscripts-9.03.49/sysconfig.txt	2015-04-09 12:44:27.000000000 -0400
++++ initscripts-9.03.49-resolv/sysconfig.txt	2015-08-10 16:00:12.916783018 -0400
+@@ -530,10 +530,10 @@ Files in /etc/sysconfig/network-scripts/
+     WINDOW=
+       Default window for routes from this device
+     PEERDNS=yes|no
+-      modify /etc/resolv.conf if peer uses msdns extension (PPP only) or
++      modify /etc/resolv-peerdns.conf if peer uses msdns extension (PPP only) or
+       DNS{1,2} are set, or if using dhclient. default to "yes".
+     DNS{1,2}=<ip address>
+-      provide DNS addresses that are dropped into the resolv.conf
++      provide DNS addresses that are dropped into the resolv-peerdns.conf
+       file if PEERDNS is not set to "no".
+     SCOPE=
+       Set to "scope SCOPE-ID" to set a non-default scope.  Supported only on
+Only in initscripts-9.03.49-resolv/: sysconfig.txt.orig
