@@ -1,12 +1,12 @@
 Summary: The inittab file and the /etc/init.d scripts
 Name: initscripts
-Version: 9.49.37
+Version: 9.49.39
 # ppp-watch is GPLv2+, everything else is GPLv2
 License: GPLv2 and GPLv2+
 Group: System Environment/Base
-Release: 1%{?dist}.1
-URL: http://fedorahosted.org/releases/i/n/initscripts/
-Source: http://fedorahosted.org/releases/i/n/initscripts/initscripts-%{version}.tar.bz2
+Release: 1%{?dist}
+URL: https://github.com/fedora-sysv/initscripts
+Source: https://github.com/fedora-sysv/initscripts/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Obsoletes: initscripts-legacy <= 9.39
 Requires: /bin/awk, sed, coreutils
@@ -18,7 +18,7 @@ Requires: bash >= 3.0
 Requires: sysvinit-tools >= 2.87-5
 Conflicts: systemd < 23-1
 Conflicts: systemd-units < 23-1
-Conflicts: lvm2 < 2.02.98-3
+Conflicts: lvm2 < 2.02.100-5
 Conflicts: dmraid < 1.0.0.rc16-18
 Requires: systemd
 Requires: iproute, /sbin/arping, findutils
@@ -166,9 +166,9 @@ rm -rf $RPM_BUILD_ROOT
 /etc/sysconfig/network-scripts/ifup-ctc
 %endif
 %config(noreplace) /etc/networks
-/etc/rwtab
+%config(noreplace) /etc/rwtab
+%config(noreplace) /etc/statetab
 %dir /etc/rwtab.d
-/etc/statetab
 %dir /etc/statetab.d
 /usr/lib/systemd/rhel-*
 /usr/lib/systemd/system/*
@@ -230,12 +230,38 @@ rm -rf $RPM_BUILD_ROOT
 /etc/profile.d/debug*
 
 %changelog
-* Tue Apr 17 2017 ClearFoundation <developer@clearfoundation.com> - 9.49.37-1.v7.1
+* Fri Aug 11 2017 ClearFoundation <developer@clearfoundation.com> - 9.49.39-1.clear
 - add multiwan patch
 - add resolver patch
 
-* Thu Feb 16 2017 David Kaspar [Dee'Kej] <dkaspar@redhat.com> - 9.49.37-1.el7_3.1
-- use DBUS calls directly instead of calling nmcli (bug #1422820)
+* Wed May 03 2017 David Kaspar [Dee'Kej] <dkaspar@redhat.com> - 9.49.39-1
+- sysconfig.txt: mention previously introduced NO_DHCP_HOSTNAME option
+- DHCP_FQDN and DHCP_SEND_HOSTNAME introduced
+- re-add missing $HOSTNAME initialization
+- ifup: add support for VLAN_EGRESS_PRIORITY_MAP
+- rhel-autorelabel: synchronize cached writes before reboot
+
+* Thu Mar 30 2017 David Kaspar [Dee'Kej] <dkaspar@redhat.com> - 9.49.38-1
+- ifdown-eth: we need to flush global scope as well
+- killproc/status: add missing '-b <binary>' option
+- specfile: mark 'rwtab' and 'statetab' as config files
+- spec: we need newer lvm
+- rwtab: add /var/lib/systemd/timers
+- ifup-eth: remove quote marks
+- 9.70-sync: Move everything to github
+- 9.70-sync: rwtab updated
+- 9.70-sync: service file updated
+- 9.70-sync: syconfig.txt updated
+- 9.70-sync: systemd/rhel-import-state updated
+- 9.70-sync: sysconfig/network-scripts/* updated - part 2
+- 9.70-sync: sysconfig/network-scripts/* updated - part 1
+- 9.70-sync: rc.d/init.d/network updated
+- 9.70-sync: rc.d/init.d/netconsole updated
+- 9.70-sync: rc.d/init.d/functions updated
+- 9.70-sync: ipv6-6to4.howto example updated
+- 9.70-sync: examples/networking/ifcfg-bridge updated
+- network: load NetworkManager connection via dbus
+- network: check for running NetworkManager via dbus
 
 * Mon Sep 12 2016 Lukáš Nykrýn <lnykryn@redhat.com> - 9.49.37-1
 - rhel-import-state: fix broken order of parameters

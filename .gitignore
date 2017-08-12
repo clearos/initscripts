@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-SOURCES/initscripts-9.49.30.tar.bz2
+SOURCES/initscripts-9.49.39.tar.gz
 /Makefile
 *.src.rpm
-=======
-SOURCES/initscripts-9.49.37.tar.bz2
->>>>>>> c7
