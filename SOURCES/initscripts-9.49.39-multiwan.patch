@@ -1,0 +1,23 @@
+diff -rup initscripts-9.49.39/sysconfig/network-scripts/ifup-eth initscripts-9.49.39-multiwan/sysconfig/network-scripts/ifup-eth
+--- initscripts-9.49.39/sysconfig/network-scripts/ifup-eth	2017-05-03 06:17:50.000000000 -0400
++++ initscripts-9.49.39-multiwan/sysconfig/network-scripts/ifup-eth	2017-08-12 07:46:38.613493265 -0400
+@@ -284,6 +284,19 @@ else
+             ip addr change ${ipaddr[$idx]}/${prefix[$idx]} dev ${REALDEVICE} valid_lft forever preferred_lft forever
+         done
+ 
++        # ClearFoundation -- improve default route handling in multi-WAN environment
++        if [ -e /etc/clearos/network.conf ]; then
++            . /etc/clearos/network.conf
++        fi
++        MULTIEXT=`echo $EXTIF | awk '{ print $2 }'`
++        if [ -n "$MULTIEXT" ]; then
++            DEFAULTEXISTS=`ip -o route | grep ^default`
++            if [ -n "$DEFAULTEXISTS" ]; then
++                DEFROUTE="no"
++            fi
++        fi
++        # ClearFoundation -- end
++
+         # Set a default route.
+         if [ "${DEFROUTE}" != "no" ] && [ -z "${GATEWAYDEV}" -o "${GATEWAYDEV}" = "${REALDEVICE}" ]; then
+             # set up default gateway. replace if one already exists

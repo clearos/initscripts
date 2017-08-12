@@ -34,9 +34,8 @@ Requires(post): /sbin/chkconfig, coreutils
 Requires(preun): /sbin/chkconfig
 BuildRequires: glib2-devel popt-devel gettext pkgconfig
 Provides: /sbin/service
-Patch001: initscripts-9.03.58-use-dbus-instead-of-nmcli.patch
-Patch100: initscripts-9.49.37-multiwan.patch
-Patch101: initscripts-9.49.37-peerdns.patch
+Patch100: initscripts-9.49.39-multiwan.patch
+Patch101: initscripts-9.49.39-peerdns.patch
 
 %description
 The initscripts package contains basic system scripts used
@@ -56,7 +55,6 @@ Currently, this consists of various memory checking code.
 
 %prep
 %setup -q
-%patch001 -p1
 %patch100 -p1
 %patch101 -p1
 

@@ -1,0 +1,28 @@
+diff -rup initscripts-9.49.39/sysconfig/network-scripts/ifup-post initscripts-9.49.39-peerdns/sysconfig/network-scripts/ifup-post
+--- initscripts-9.49.39/sysconfig/network-scripts/ifup-post	2017-05-03 06:17:50.000000000 -0400
++++ initscripts-9.49.39-peerdns/sysconfig/network-scripts/ifup-post	2017-08-12 07:51:53.284486330 -0400
+@@ -37,13 +37,13 @@ if ! is_false "$PEERDNS" || [ -n "$RESOL
+         DNS2=
+     fi
+ 
+-    if ( [ -n "$DNS1" ] && ! grep -q "^nameserver $DNS1" /etc/resolv.conf ) ||
+-            ( [ -n "$DNS2" ] && ! grep -q "^nameserver $DNS2" /etc/resolv.conf ) &&
++    if ( [ -n "$DNS1" ] && ! grep -q "^nameserver $DNS1" /etc/resolv-peerdns.conf ) ||
++            ( [ -n "$DNS2" ] && ! grep -q "^nameserver $DNS2" /etc/resolv-peerdns.conf ) &&
+             tr=$(mktemp /tmp/XXXXXX) ; then
+         current_replacement="$DNS1"
+         next_replacement="$DNS2"
+         search=
+-        (cat /etc/resolv.conf ; echo EOF ; echo EOF) | while read answer ; do
++        (cat /etc/resolv-peerdns.conf ; echo EOF ; echo EOF) | while read answer ; do
+             case $answer in
+             nameserver*|EOF)
+                 if [ -n "$current_replacement" ] ; then
+@@ -80,6 +80,7 @@ if ! is_false "$PEERDNS" || [ -n "$RESOL
+ 
+         # backup resolv.conf
+         cp -af /etc/resolv.conf /etc/resolv.conf.save
++        cp -af /etc/resolv-peernds.conf /etc/resolv-peerdns.conf.save
+ 
+         # maintain permissions
+         # but set umask in case it doesn't exist!
